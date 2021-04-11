@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	"short-url/repo"
+	"short-url-server/repo"
 	"strings"
 )
 
