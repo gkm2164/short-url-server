@@ -1,4 +1,4 @@
-module short-url
+module short-url-server
 
 go 1.16
 
