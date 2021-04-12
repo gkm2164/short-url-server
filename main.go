@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"short-url-server/repo"
 	"strings"
+	"time"
 )
 
 type NewAddrRequest struct {
@@ -22,6 +23,7 @@ type DeleteAddrRequest struct {
 }
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
 	var log = logrus.New()
 	db := repo.New(log)
 
