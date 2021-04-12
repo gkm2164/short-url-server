@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -40,7 +41,6 @@ func main() {
 
 	server.POST("/", func(c *gin.Context) {
 		var req NewAddrRequest
-		id := randomString()
 		if value, err := ioutil.ReadAll(c.Request.Body); err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{
 				"error": fmt.Sprintf("while read: %v", err),
@@ -49,7 +49,7 @@ func main() {
 			c.JSON(http.StatusNotAcceptable, gin.H{
 				"error": fmt.Sprintf("while unmarshal: %v", err),
 			})
-		} else if err := db.InsertUrl(id, req.Url); err != nil {
+		} else if id, err := insertUrlUntilSuccess(db, req.Url); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("while insert to db: %v", err),
 			})
@@ -94,6 +94,25 @@ func stripPath(uri string, s string) string {
 }
 
 const UrlSize = 11
+
+func insertUrlUntilSuccess(db *repo.DDB, url string) (*string, error) {
+	var success = false
+	for !success {
+		id := randomString()
+		if urlModel, err := db.FindUrlById(id); err != nil {
+			return nil, fmt.Errorf("error when calling db: %v", err)
+		} else if urlModel.Id == id { // searched from DB
+			continue
+		} else if err := db.InsertUrl(id, url); err != nil {
+			return nil, fmt.Errorf("errors when trying to put item: %v", err)
+		} else {
+			success = true
+			return &id, nil
+		}
+	}
+
+	return nil, errors.New("should not reach here")
+}
 
 func randomString() string {
 	letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
