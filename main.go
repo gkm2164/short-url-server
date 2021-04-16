@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/toorop/gin-logrus"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -28,7 +29,7 @@ func main() {
 	db := repo.New(log)
 
 	server := gin.New()
-
+	server.Use(ginlogrus.Logger(log), gin.Recovery())
 	server.GET("/*path", func(c *gin.Context) {
 		path := stripPath(c.Request.RequestURI, "/")
 		if len(path) <= 1 {
