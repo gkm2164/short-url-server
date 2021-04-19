@@ -19,10 +19,6 @@ type NewAddrRequest struct {
 	Url string `json:"url"`
 }
 
-type DeleteAddrRequest struct {
-	Id string `json:"id"`
-}
-
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	var log = logrus.New()
@@ -39,6 +35,23 @@ func main() {
 			c.File("./assets/" + path)
 		} else {
 			c.Redirect(http.StatusMovedPermanently, url.Url)
+		}
+	})
+
+	server.DELETE("/*path", func(c *gin.Context) {
+		var path = c.Param("path")
+		if path == "" {
+			c.JSON(http.StatusNotAcceptable, gin.H{
+				"error": "path should be not empty",
+			})
+		} else if err := db.DeleteUrl(path); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err,
+			})
+		} else {
+			c.JSON(http.StatusAccepted, gin.H{
+				"message": "deleted successfully!",
+			})
 		}
 	})
 
@@ -59,27 +72,6 @@ func main() {
 		} else {
 			c.JSON(http.StatusAccepted, gin.H{
 				"id": id,
-			})
-		}
-	})
-
-	server.DELETE("/", func(c *gin.Context) {
-		var req DeleteAddrRequest
-		if value, err := ioutil.ReadAll(c.Request.Body); err != nil {
-			c.JSON(http.StatusNotAcceptable, gin.H{
-				"error": err,
-			})
-		} else if err := json.Unmarshal(value, &req); err != nil {
-			c.JSON(http.StatusNotAcceptable, gin.H{
-				"error": err,
-			})
-		} else if err := db.DeleteUrl(req.Id); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
-			})
-		} else {
-			c.JSON(http.StatusAccepted, gin.H{
-				"message": "deleted successfully!",
 			})
 		}
 	})
