@@ -1,9 +1,11 @@
 package model
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type Url struct {
-	Id        string    `json:"id"`
-	Url       string    `json:"url"`
-	CreatedAt time.Time `json:"created_at"`
+	gorm.Model
+	ShortenId string `json:"shorten_id"`
+	Url       string `json:"url"`
 }

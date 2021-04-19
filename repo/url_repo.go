@@ -1,67 +1,35 @@
 package repo
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"short-url-server/repo/model"
-	"time"
 )
-
-var TableName = aws.String("ShortUrls")
 
 func (r *DDB) FindUrlById(id string) (*model.Url, error) {
 	var url model.Url
-	if result, err := r.DB().GetItem(&dynamodb.GetItemInput{
-		TableName: TableName,
-		Key: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: aws.String(id),
-			},
-		},
-	}); err != nil {
-		return nil, err
-	} else if err := dynamodbattribute.UnmarshalMap(result.Item, &url); err != nil {
-		return nil, err
+	if tx := r.DB().First(&url, "shorten_id = ?", id); tx.Error != nil {
+		return nil, tx.Error
 	} else {
 		return &url, nil
 	}
-
 }
 
-func (r *DDB) InsertUrl(id string, url string) error {
-	if av, err := dynamodbattribute.MarshalMap(model.Url{
-		Id:        id,
+func (r *DDB) InsertUrl(id string, url string) (uint, error) {
+	urlEntity := model.Url{
+		ShortenId: id,
 		Url:       url,
-		CreatedAt: time.Now(),
-	}); err != nil {
-		r.Log().Errorf("error %v", err)
-		return err
-	} else if _, err := r.DB().PutItem(&dynamodb.PutItemInput{
-		TableName: TableName,
-		Item: av,
-	}); err != nil {
-		return err
 	}
 
-	return nil
+	if result := r.DB().Create(&urlEntity); urlEntity.ID == 0 {
+		return urlEntity.ID, result.Error
+	} else {
+		return 0, nil
+	}
 }
 
 func (r *DDB) DeleteUrl(id string) error {
-	input := &dynamodb.DeleteItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: aws.String(id),
-			},
-		},
-		TableName: TableName,
+	if result := r.DB().Delete(&model.Url{}, "shorten_id = ?", id); result.Error != nil {
+		return result.Error
+	} else {
+		return nil
 	}
-
-	_, err := r.DB().DeleteItem(input)
-	if err != nil {
-		r.Log().Errorf("failed to delete url: %s", err)
-		return err
-	}
-
-	return nil
 }

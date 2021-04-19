@@ -102,11 +102,7 @@ func insertUrlUntilSuccess(db *repo.DDB, url string) (*string, error) {
 	var success = false
 	for !success {
 		id := randomString()
-		if urlModel, err := db.FindUrlById(id); err != nil {
-			return nil, fmt.Errorf("error when calling db: %v", err)
-		} else if urlModel.Id == id { // searched from DB
-			continue
-		} else if err := db.InsertUrl(id, url); err != nil {
+		if _, err := db.InsertUrl(id, url); err != nil {
 			return nil, fmt.Errorf("errors when trying to put item: %v", err)
 		} else {
 			success = true
