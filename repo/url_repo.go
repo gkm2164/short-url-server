@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"errors"
+	"fmt"
 	"short-url-server/repo/model"
 )
 
@@ -12,7 +14,6 @@ func (r *DDB) FindUrlById(id string) (*model.Url, error) {
 		return &url, nil
 	}
 }
-
 
 func (r *DDB) FindAllUrls() ([]model.Url, error) {
 	var urls []model.Url
@@ -33,6 +34,16 @@ func (r *DDB) InsertUrl(id string, url string) (uint, error) {
 		return urlEntity.ID, result.Error
 	} else {
 		return 0, nil
+	}
+}
+
+func (r *DDB) UpdateUrl(id string, url string) (int64, error) {
+	if tx := r.DB().Update("url", &model.Url{ShortenId: id, Url: url}); tx == nil {
+		return 0, errors.New("transaction returns null")
+	} else if tx.Error != nil {
+		return 0, fmt.Errorf("error from DB: %v", tx.Error)
+	} else {
+		return tx.RowsAffected, nil
 	}
 }
 
