@@ -1,13 +1,13 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server celler server.",
+        "description": "This is API document page for URL shortener.",
         "title": "URL Shortener API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
+            "name": "URL Shortener",
+            "url": "https://gyeongmin.co",
+            "email": "gkm2164@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -312,9 +312,6 @@
             "type": "apiKey",
             "name": "X-Api-Key",
             "in": "header"
-        },
-        "BasicAuth": {
-            "type": "basic"
         }
     }
 }

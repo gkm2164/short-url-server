@@ -20,9 +20,9 @@ var doc = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
+            "name": "URL Shortener",
+            "url": "https://gyeongmin.co",
+            "email": "gkm2164@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -329,9 +329,6 @@ var doc = `{
             "type": "apiKey",
             "name": "X-Api-Key",
             "in": "header"
-        },
-        "BasicAuth": {
-            "type": "basic"
         }
     }
 }`
@@ -352,7 +349,7 @@ var SwaggerInfo = swaggerInfo{
 	BasePath:    "",
 	Schemes:     []string{},
 	Title:       "URL Shortener API",
-	Description: "This is a sample server celler server.",
+	Description: "This is API document page for URL shortener.",
 }
 
 type s struct{}

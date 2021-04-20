@@ -66,10 +66,10 @@ definitions:
     type: object
 info:
   contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+    email: gkm2164@gmail.com
+    name: URL Shortener
+    url: https://gyeongmin.co
+  description: This is API document page for URL shortener.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -205,6 +205,4 @@ securityDefinitions:
     in: header
     name: X-Api-Key
     type: apiKey
-  BasicAuth:
-    type: basic
 swagger: "2.0"

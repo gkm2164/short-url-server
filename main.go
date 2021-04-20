@@ -1,18 +1,14 @@
 // @title URL Shortener API
 // @version 1.0
-// @description This is a sample server celler server.
+// @description This is API document page for URL shortener.
 // @termsOfService http://swagger.io/terms/
 
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+// @contact.name URL Shortener
+// @contact.url https://gyeongmin.co
+// @contact.email gkm2164@gmail.com
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @query.collection.format multi
-
-// @securityDefinitions.basic BasicAuth
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
