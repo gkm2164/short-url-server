@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/toorop/gin-logrus"
@@ -25,24 +26,6 @@ func main() {
 		c.File("./assets/index.html")
 	})
 
-	server.GET("/favicon.ico", func(c *gin.Context) {
-		c.File("./assets/favicon.ico")
-	})
-
-	server.GET("/logo192.png", func(c *gin.Context) {
-		c.File("./assets/logo192.png")
-	})
-
-	server.GET("/static/css/main.css", func(c *gin.Context) {
-		c.File("./assets//static/css/main.css")
-	})
-
-	server.GET("/static/js/bundle.js", func(c *gin.Context) {
-		fmt.Println("??")
-		c.Header("Content-Type", "text/javascript")
-		c.File("./assets/static/js/bundle.js")
-	})
-
 	urlGroup := server.Group("/urls")
 	{
 		urlGroup.GET("/", handlers.UrlHandler(db))
@@ -61,11 +44,14 @@ func main() {
 	server.GET("/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		if url, err := db.FindUrlById(id); err != nil || url == nil || len(url.Url) < 1 {
+			fmt.Println(id)
 			c.File("./assets/" + id)
 		} else {
 			c.Redirect(http.StatusMovedPermanently, url.Url)
 		}
 	})
+
+	server.NoRoute(static.ServeRoot("/", "./assets/"))
 
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
