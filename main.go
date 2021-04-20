@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"short-url-server/repo"
 	"strings"
 	"time"
@@ -19,6 +21,9 @@ type NewAddrRequest struct {
 	Url string `json:"url"`
 }
 
+const Succeed = "succeed"
+const Failed = "failed"
+
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	var log = logrus.New()
@@ -27,11 +32,15 @@ func main() {
 	server := gin.New()
 	server.Use(ginlogrus.Logger(log), gin.Recovery())
 	server.GET("/*path", func(c *gin.Context) {
-		path := stripPath(c.Request.RequestURI, "/")
+		path := strings.TrimPrefix(c.Request.RequestURI, "/")
 		if len(path) <= 1 {
 			path = "index.html"
 		}
-		if url, err := db.FindUrlById(path); err != nil || url == nil || len(url.Url) < 1 {
+		if strings.HasPrefix(path, "urls") {
+			urlHandler(db)(c)
+		} else if strings.HasPrefix(path, "stats") {
+			urlStatHandler(db)(c)
+		} else if url, err := db.FindUrlById(path); err != nil || url == nil || len(url.Url) < 1 {
 			c.File("./assets/" + path)
 		} else {
 			c.Redirect(http.StatusMovedPermanently, url.Url)
@@ -42,14 +51,17 @@ func main() {
 		var path = c.Param("path")
 		if path == "" {
 			c.JSON(http.StatusNotAcceptable, gin.H{
-				"error": "path should be not empty",
+				"status":  Failed,
+				"message": "path should be not empty",
 			})
 		} else if err := db.DeleteUrl(path); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"status":  Failed,
+				"message": err,
 			})
 		} else {
 			c.JSON(http.StatusAccepted, gin.H{
+				"status":  Succeed,
 				"message": "deleted successfully!",
 			})
 		}
@@ -59,18 +71,22 @@ func main() {
 		var req NewAddrRequest
 		if value, err := ioutil.ReadAll(c.Request.Body); err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{
-				"error": fmt.Sprintf("while read: %v", err),
+				"status": Failed,
+				"message": fmt.Sprintf("while read: %v", err),
 			})
 		} else if err := json.Unmarshal(value, &req); err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{
-				"error": fmt.Sprintf("while unmarshal: %v", err),
+				"status": Failed,
+				"message": fmt.Sprintf("while unmarshal: %v", err),
 			})
 		} else if id, err := insertUrlUntilSuccess(db, req.Url); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": fmt.Sprintf("while insert to db: %v", err),
+				"status": Failed,
+				"message": fmt.Sprintf("while insert to db: %v", err),
 			})
 		} else {
 			c.JSON(http.StatusAccepted, gin.H{
+				"status": Succeed,
 				"id": id,
 			})
 		}
@@ -81,11 +97,99 @@ func main() {
 	}
 }
 
-func stripPath(uri string, s string) string {
-	if strings.HasPrefix(uri, s) {
-		return uri[len(s):]
+const generalQuery = `SELECT REGEXP_REPLACE(REGEXP_REPLACE(url, 'https?://', ''), '/.*', '') AS HOSTNAME, COUNT(*) AS CNT FROM urls GROUP BY HOSTNAME`
+const queryByHostName = `
+SELECT * FROM (
+    SELECT REGEXP_REPLACE(REGEXP_REPLACE(url, 'https?://', ''), '/.*', '') AS HOSTNAME, COUNT(*) AS CNT
+    FROM urls
+    GROUP BY HOSTNAME) A
+WHERE HOSTNAME='%s';`
+
+var IdRegexUnderUrl = regexp.MustCompile("/urls/(?P<id>[a-zA-Z0-9]+)(\\?.*)?")
+var IdRegexUnderStat = regexp.MustCompile("/stats/(?P<id>[a-zA-Z0-9]+)(\\?.*)?")
+var idIdxUnderUrl = IdRegexUnderUrl.SubexpIndex("id")
+var idIdxUnderStat = IdRegexUnderStat.SubexpIndex("id")
+
+func urlHandler(db *repo.DDB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uri := strings.TrimPrefix(c.Request.RequestURI, "/urls")
+		if IdRegexUnderUrl.MatchString(uri) {
+			idmatch := IdRegexUnderUrl.FindStringSubmatch(uri)[idIdxUnderUrl]
+			if url, err := db.FindUrlById(idmatch); err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"status":  Failed,
+					"message": "id not found",
+				})
+			} else {
+				c.JSON(http.StatusFound, gin.H{
+					"status": Succeed,
+					"url":    url,
+				})
+			}
+		} else {
+			if ret, err := db.FindAllUrls(); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"status":  Failed,
+					"message": "retrieving urls failed",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"status": Succeed,
+					"urls":   ret,
+				})
+			}
+		}
 	}
-	return uri
+}
+
+func urlStatHandler(db *repo.DDB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var rows *sql.Rows
+		var err error
+		type RetStruct struct {
+			Hostname string `json:"hostname"`
+			Count    int    `json:"count"`
+		}
+
+		var rets []RetStruct
+		hostname := c.Query("hostname")
+		if hostname == "" {
+			if rows, err = db.DB().Raw(generalQuery).Rows(); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"status": Failed,
+					"message": "Error while digging from DB",
+				})
+				goto ret
+			}
+		} else {
+			if rows, err = db.DB().Raw(fmt.Sprintf(queryByHostName, hostname)).Rows(); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"status": Failed,
+					"message": "Error while digging from DB",
+				})
+				goto ret
+			}
+		}
+
+		defer rows.Close()
+
+		for rows.Next() {
+			var hostname string
+			var count int
+
+			_ = rows.Scan(&hostname, &count)
+			rets = append(rets, RetStruct{
+				Hostname: hostname,
+				Count:    count,
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": Succeed,
+			"stats":  rets,
+		})
+	ret:
+	}
 }
 
 const UrlSize = 11

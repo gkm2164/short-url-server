@@ -13,6 +13,16 @@ func (r *DDB) FindUrlById(id string) (*model.Url, error) {
 	}
 }
 
+
+func (r *DDB) FindAllUrls() ([]model.Url, error) {
+	var urls []model.Url
+	if tx := r.DB().Find(&urls); tx.Error != nil {
+		return nil, tx.Error
+	} else {
+		return urls, nil
+	}
+}
+
 func (r *DDB) InsertUrl(id string, url string) (uint, error) {
 	urlEntity := model.Url{
 		ShortenId: id,
