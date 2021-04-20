@@ -38,7 +38,9 @@ func (r *DDB) InsertUrl(id string, url string) (uint, error) {
 }
 
 func (r *DDB) UpdateUrl(id string, url string) (int64, error) {
-	if tx := r.DB().Update("url", &model.Url{ShortenId: id, Url: url}); tx == nil {
+	if tx := r.DB().Model(&model.Url{}).
+		Where("shorten_id = ?", id).
+		Update("url", url); tx == nil {
 		return 0, errors.New("transaction returns null")
 	} else if tx.Error != nil {
 		return 0, fmt.Errorf("error from DB: %v", tx.Error)

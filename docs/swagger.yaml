@@ -1,0 +1,210 @@
+definitions:
+  comm.AllUrlResponse:
+    properties:
+      status:
+        type: string
+      urls:
+        items:
+          $ref: '#/definitions/comm.UrlEntity'
+        type: array
+    type: object
+  comm.CreateUrlRequest:
+    properties:
+      url:
+        type: string
+    type: object
+  comm.CreateUrlResponse:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+    type: object
+  comm.FailureResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  comm.GetUrlResponse:
+    properties:
+      status:
+        type: string
+      url:
+        $ref: '#/definitions/comm.UrlEntity'
+    type: object
+  comm.SuccessResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  comm.UpdateUrlRequest:
+    properties:
+      url:
+        type: string
+    type: object
+  comm.UpdateUrlResponse:
+    properties:
+      status:
+        type: string
+      url:
+        type: boolean
+    type: object
+  comm.UrlEntity:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: URL Shortener API
+  version: "1.0"
+paths:
+  /urls:
+    get:
+      description: get all URLs from DB
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comm.AllUrlResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+      summary: Read URLs
+    post:
+      consumes:
+      - application/json
+      description: Create new URL mapping
+      parameters:
+      - description: Create short URL
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/comm.CreateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/comm.CreateUrlResponse'
+        "406":
+          description: Not Acceptable
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+      summary: Create shorten URL
+  /urls/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete single URL entry
+      parameters:
+      - description: URL ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/comm.SuccessResponse'
+        "406":
+          description: Not Acceptable
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+      summary: delete URL entry
+    get:
+      consumes:
+      - application/json
+      description: Get Single URL Information
+      parameters:
+      - description: URL ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comm.GetUrlResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+      summary: URL info
+    patch:
+      consumes:
+      - application/json
+      description: Update single URL entry
+      parameters:
+      - description: URL ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: URL to be updated
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/comm.UpdateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comm.UpdateUrlResponse'
+        "406":
+          description: Not Acceptable
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/comm.FailureResponse'
+      summary: update URL entry
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: X-Api-Key
+    type: apiKey
+  BasicAuth:
+    type: basic
+swagger: "2.0"
