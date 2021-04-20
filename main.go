@@ -20,6 +20,7 @@ func main() {
 	db := repo.New(log)
 
 	server := gin.New()
+	server.RedirectTrailingSlash = false
 	server.Use(ginlogrus.Logger(log), gin.Recovery())
 
 	server.GET("/", func(c *gin.Context) {
@@ -28,8 +29,8 @@ func main() {
 
 	urlGroup := server.Group("/urls")
 	{
-		urlGroup.GET("/", handlers.UrlHandler(db))
-		urlGroup.POST("/", handlers.AddUrlHandler(db))
+		urlGroup.GET("", handlers.UrlHandler(db))
+		urlGroup.POST("", handlers.AddUrlHandler(db))
 		urlGroup.GET("/:id", handlers.SingleUrlHandler(db))
 		urlGroup.PATCH("/:id", handlers.SingleUrlUpdateHandler(db))
 		urlGroup.DELETE("/:id", handlers.SingleUrlDeleteHandler(db))
@@ -37,7 +38,7 @@ func main() {
 
 	statGroup := server.Group("/stats")
 	{
-		statGroup.GET("/", handlers.StatHandler(db))
+		statGroup.GET("", handlers.StatHandler(db))
 		statGroup.GET("/:id", handlers.SingleStatHandler(db))
 	}
 
