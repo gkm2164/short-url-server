@@ -327,7 +327,7 @@ var doc = `{
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "X-Api-Key",
+            "name": "X-API-Key",
             "in": "header"
         }
     }

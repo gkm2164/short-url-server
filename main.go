@@ -12,8 +12,7 @@
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name X-Api-Key
-
+// @name X-API-Key
 package main
 
 import (

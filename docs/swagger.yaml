@@ -203,6 +203,6 @@ paths:
 securityDefinitions:
   ApiKeyAuth:
     in: header
-    name: X-Api-Key
+    name: X-API-Key
     type: apiKey
 swagger: "2.0"
