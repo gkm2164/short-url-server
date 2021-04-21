@@ -56,6 +56,13 @@
                         "schema": {
                             "$ref": "#/definitions/comm.CreateUrlRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key for Header",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -130,6 +137,13 @@
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key for Header",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -168,6 +182,13 @@
                         "description": "URL ID",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key for Header",
+                        "name": "X-API-Key",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -292,6 +313,9 @@
         "comm.UrlEntity": {
             "type": "object",
             "properties": {
+                "access_count": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },

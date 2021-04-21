@@ -73,6 +73,13 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/comm.CreateUrlRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key for Header",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -147,6 +154,13 @@ var doc = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key for Header",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -185,6 +199,13 @@ var doc = `{
                         "description": "URL ID",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key for Header",
+                        "name": "X-API-Key",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -309,6 +330,9 @@ var doc = `{
         "comm.UrlEntity": {
             "type": "object",
             "properties": {
+                "access_count": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },

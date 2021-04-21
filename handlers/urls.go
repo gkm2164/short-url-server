@@ -43,6 +43,7 @@ func UrlHandler(db *repo.DDB) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param req body comm.CreateUrlRequest true "Create short URL"
+// @Param X-API-Key header string true "API Key for Header"
 // @Success 202 {object} comm.CreateUrlResponse
 // @Failure 406 {object} comm.FailureResponse
 // @Failure 500 {object} comm.FailureResponse
@@ -106,6 +107,7 @@ func SingleUrlHandler(db *repo.DDB) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param id path string true "URL ID"
+// @Param X-API-Key header string true "API Key for Header"
 // @Param request body comm.UpdateUrlRequest true "URL to be updated"
 // @Success 200 {object} comm.UpdateUrlResponse
 // @Failure 406 {object} comm.FailureResponse
@@ -145,6 +147,7 @@ func SingleUrlUpdateHandler(db *repo.DDB) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param id path string true "URL ID"
+// @Param X-API-Key header string true "API Key for Header"
 // @Success 202 {object} comm.SuccessResponse
 // @Failure 406 {object} comm.FailureResponse
 // @Failure 500 {object} comm.FailureResponse
