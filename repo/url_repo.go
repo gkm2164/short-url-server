@@ -15,6 +15,16 @@ func (r *DDB) FindUrlById(id string) (*model.Url, error) {
 	}
 }
 
+func (r *DDB) IncAccessCount(id string) error {
+	if tx := r.DB().Exec("UPDATE urls SET access_count = access_count + 1 WHERE shorten_id = ?", id); tx == nil {
+		return errors.New("error while update")
+	} else if tx.Error != nil {
+		return fmt.Errorf("error from db: %v", tx.Error)
+	} else {
+		return nil
+	}
+}
+
 func (r *DDB) FindAllUrls() ([]model.Url, error) {
 	var urls []model.Url
 	if tx := r.DB().Find(&urls); tx.Error != nil {

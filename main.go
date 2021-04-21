@@ -16,7 +16,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -66,9 +65,14 @@ func main() {
 	server.GET("/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		if url, err := db.FindUrlById(id); err != nil || url == nil || len(url.Url) < 1 {
-			fmt.Println(id)
 			c.File("./assets/" + id)
 		} else {
+			go func() {
+				err := db.IncAccessCount(url.ShortenId)
+				if err != nil {
+					log.Errorf("error while increment ID")
+				}
+			}()
 			c.Redirect(http.StatusMovedPermanently, url.Url)
 		}
 	})
