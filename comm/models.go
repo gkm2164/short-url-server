@@ -23,10 +23,11 @@ type GetUrlResponse struct {
 }
 
 type UrlEntity struct {
-	Id        string    `json:"id"`
-	Url       string    `json:"url"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id          string    `json:"id"`
+	Url         string    `json:"url"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	AccessCount int64     `json:"access_count"`
 }
 
 type CreateUrlRequest struct {

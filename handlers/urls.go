@@ -199,10 +199,11 @@ func randomString() string {
 
 func convertToUrlEntity(src model.Url) comm.UrlEntity {
 	return comm.UrlEntity{
-		Id:        src.ShortenId,
-		Url:       src.Url,
-		CreatedAt: src.CreatedAt,
-		UpdatedAt: src.UpdatedAt,
+		Id:          src.ShortenId,
+		Url:         src.Url,
+		CreatedAt:   src.CreatedAt,
+		UpdatedAt:   src.UpdatedAt,
+		AccessCount: src.AccessCount,
 	}
 }
 
